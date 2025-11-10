@@ -64,14 +64,15 @@ Perfect for:
 
 To export your Cursor usage data:
 
-1. Open **Cursor Settings** (Ctrl/Cmd + ,)
-2. Navigate to **Cursor Settings** → **General** tab
-3. Scroll down to **"Usage"** section
-4. Click **"View Team Usage"** button
-5. In the opened page, click **"Export to CSV"** button
-6. Save the CSV file to the `csv_data/` folder in this project
+1. Open [**Cursor Dashboard**](https://cursor.com/dashboard?tab=usage) in your browser
+2. Navigate to the **"Usage"** tab
+3. Click the **"Export CSV"** button in the top right
+4. Your CSV download will start automatically
+5. Save the CSV file to the `csv_data/` folder in this project
 
 The CSV file will be named like `team-usage-events-XXXXXXXX-YYYY-MM-DD.csv`
+
+> 💡 **Tip:** You can also access the dashboard from Cursor Settings → General → "View Team Usage"
 
 ### 🚀 Quick Start
 
@@ -192,14 +193,15 @@ Cursor Usage Analyzer - мощный инструмент аналитики д�
 
 Чтобы экспортировать данные использования Cursor:
 
-1. Откройте **Настройки Cursor** (Ctrl/Cmd + ,)
-2. Перейдите на вкладку **Cursor Settings** → **General**
-3. Прокрутите вниз до раздела **"Usage"**
-4. Нажмите кнопку **"View Team Usage"**
-5. На открывшейся странице нажмите кнопку **"Export to CSV"**
-6. Сохраните CSV файл в папку `csv_data/` этого проекта
+1. Откройте [**Cursor Dashboard**](https://cursor.com/dashboard?tab=usage) в браузере
+2. Перейдите на вкладку **"Usage"**
+3. Нажмите кнопку **"Export CSV"** в правом верхнем углу
+4. CSV файл автоматически начнет скачиваться
+5. Сохраните CSV файл в папку `csv_data/` этого проекта
 
 Имя CSV файла будет выглядеть как `team-usage-events-XXXXXXXX-YYYY-MM-DD.csv`
+
+> 💡 **Совет:** Также можно открыть dashboard из Настроек Cursor → General → "View Team Usage"
 
 ### 🚀 Быстрый старт
 
