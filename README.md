@@ -22,7 +22,7 @@ Perfect for:
 - 💰 **Cost tracking** - understand where your money goes
 - 📈 **Usage optimization** - identify peak hours and optimize workflows  
 - 🔍 **Model comparison** - see which models you use most
-- 📊 **Visual reports** - 9 beautiful charts and heatmaps
+- 📊 **Visual reports** - 10 beautiful charts and heatmaps
 
 ### ✨ Features
 
@@ -60,11 +60,26 @@ Perfect for:
 #### Cost Per Request Heatmap
 ![Cost Per Request Heatmap](screenshots/10_cost_per_request_heatmap.png)
 
+### 📥 Getting Your Usage Data
+
+To export your Cursor usage data:
+
+1. Open **Cursor Settings** (Ctrl/Cmd + ,)
+2. Navigate to **Cursor Settings** → **General** tab
+3. Scroll down to **"Usage"** section
+4. Click **"View Team Usage"** button
+5. In the opened page, click **"Export to CSV"** button
+6. Save the CSV file to the `csv_data/` folder in this project
+
+The CSV file will be named like `team-usage-events-XXXXXXXX-YYYY-MM-DD.csv`
+
 ### 🚀 Quick Start
 
 ```bash
 # Install dependencies
 pip install matplotlib seaborn numpy tqdm
+
+# Place your CSV file in csv_data/ folder
 
 # Run analyzer
 python main.py
@@ -135,7 +150,7 @@ Cursor Usage Analyzer - мощный инструмент аналитики д�
 - 💰 **Отслеживания расходов** - понимайте куда уходят деньги
 - 📈 **Оптимизации использования** - выявляйте пиковые часы и оптимизируйте рабочие процессы
 - 🔍 **Сравнения моделей** - смотрите какие модели используете чаще всего
-- 📊 **Визуальных отчетов** - 9 красивых графиков и тепловых карт
+- 📊 **Визуальных отчетов** - 10 красивых графиков и тепловых карт
 
 ### ✨ Возможности
 
@@ -146,10 +161,11 @@ Cursor Usage Analyzer - мощный инструмент аналитики д�
   - Временной анализ (дневные, почасовые, недельные паттерны)
 
 - **Богатая визуализация**
-  - 9 профессиональных графиков с темной темой
+  - 10 профессиональных графиков с темной темой
   - Интерактивные тепловые карты паттернов использования
   - Графики сравнения моделей
   - Аналитика стоимости на запрос и тепловые карты
+  - Box plot анализ распределения
 
 - **Простота использования**
   - Запуск одной командой
@@ -166,17 +182,32 @@ Cursor Usage Analyzer - мощный инструмент аналитики д�
 ![Included vs On-Demand](screenshots/02_included_vs_ondemand.png)
 
 #### Тепловые карты использования
-![Requests Heatmap](screenshots/07_requests_heatmap.png)
-![Cost Heatmap](screenshots/08_cost_heatmap.png)
+![Requests Heatmap](screenshots/08_requests_heatmap.png)
+![Cost Heatmap](screenshots/09_cost_heatmap.png)
 
 #### Тепловая карта стоимости запроса
-![Cost Per Request Heatmap](screenshots/09_cost_per_request_heatmap.png)
+![Cost Per Request Heatmap](screenshots/10_cost_per_request_heatmap.png)
+
+### 📥 Получение данных об использовании
+
+Чтобы экспортировать данные использования Cursor:
+
+1. Откройте **Настройки Cursor** (Ctrl/Cmd + ,)
+2. Перейдите на вкладку **Cursor Settings** → **General**
+3. Прокрутите вниз до раздела **"Usage"**
+4. Нажмите кнопку **"View Team Usage"**
+5. На открывшейся странице нажмите кнопку **"Export to CSV"**
+6. Сохраните CSV файл в папку `csv_data/` этого проекта
+
+Имя CSV файла будет выглядеть как `team-usage-events-XXXXXXXX-YYYY-MM-DD.csv`
 
 ### 🚀 Быстрый старт
 
 ```bash
 # Установите зависимости
 pip install matplotlib seaborn numpy tqdm
+
+# Поместите ваш CSV файл в папку csv_data/
 
 # Запустите анализатор
 python main.py
