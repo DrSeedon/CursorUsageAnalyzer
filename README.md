@@ -54,7 +54,7 @@ Perfect for:
 ![Included vs On-Demand](screenshots/02_included_vs_ondemand.png)
 
 #### Usage Heatmaps
-![Requests Heatmap](screenshots/07_requests_heatmap.png)
+![Requests Heatmap](screenshots/08_requests_heatmap.png)
 ![Cost Heatmap](screenshots/09_cost_heatmap.png)
 
 #### Cost Per Request Heatmap
