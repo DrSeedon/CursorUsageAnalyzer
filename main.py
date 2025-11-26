@@ -8,22 +8,55 @@ from analyzers import CSVAnalyzer
 from visualizers import ModelChartsVisualizer, ActivityChartsVisualizer, HeatmapChartsVisualizer
 
 
+def select_period():
+    """Интерактивный выбор периода анализа."""
+    print("\n" + "=" * 70)
+    print("ВЫБОР ПЕРИОДА АНАЛИЗА")
+    print("=" * 70)
+    print("\n1 - Все данные")
+    print("2 - Последний месяц (30 дней)")
+    print("3 - Последняя неделя (7 дней)")
+    print("4 - Последний день (24 часа)")
+    
+    while True:
+        choice = input("\nВыберите вариант (1-4): ").strip()
+        if choice == '1':
+            return 'all'
+        elif choice == '2':
+            return 'month'
+        elif choice == '3':
+            return 'week'
+        elif choice == '4':
+            return 'day'
+        else:
+            print("❌ Неправильный выбор. Попробуйте снова (1-4)")
+
+
 class CursorUsageAnalyzer:
     """Главный класс для анализа использования Cursor."""
     
-    def __init__(self):
+    def __init__(self, period='all'):
         """Инициализирует анализатор."""
         setup_output_encoding()
         self.csv_file = find_csv_file()
-        self.analyzer = CSVAnalyzer(self.csv_file)
+        self.period = period
+        self.analyzer = CSVAnalyzer(self.csv_file, period=period)
         self.results = None
     
     def analyze(self):
         """Выполняет анализ CSV файла."""
+        period_names = {
+            'all': 'Все данные',
+            'month': 'Последний месяц',
+            'week': 'Последняя неделя',
+            'day': 'Последний день'
+        }
+        
         print("=" * 70)
         print("АНАЛИЗАТОР ИСПОЛЬЗОВАНИЯ CURSOR")
         print("=" * 70)
         print(f"\nФайл: {self.csv_file}")
+        print(f"Период: {period_names.get(self.period, self.period)}")
         
         self.results = self.analyzer.analyze()
         
@@ -133,7 +166,8 @@ class CursorUsageAnalyzer:
 
 def main():
     """Главная функция."""
-    analyzer = CursorUsageAnalyzer()
+    period = select_period()
+    analyzer = CursorUsageAnalyzer(period=period)
     analyzer.run()
 
 

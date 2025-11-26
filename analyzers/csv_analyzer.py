@@ -10,14 +10,17 @@ from .cost_calculator import CostCalculator
 class CSVAnalyzer:
     """Класс для анализа CSV данных об использовании Cursor."""
     
-    def __init__(self, csv_file):
+    def __init__(self, csv_file, period='all'):
         """
         Инициализирует анализатор.
         
         Args:
             csv_file: Путь к CSV файлу
+            period: 'all', 'month', 'week', 'day'
         """
         self.csv_file = csv_file
+        self.period = period
+        self.period_start = self._get_period_start()
         self.models = defaultdict(lambda: {
             'included_requests': 0, 'on_demand_requests': 0,
             'included_cost': 0.0, 'on_demand_cost': 0.0,
@@ -28,6 +31,17 @@ class CSVAnalyzer:
         self.daily_usage = defaultdict(lambda: defaultdict(int))
         self.hourly_usage = defaultdict(int)
         self.request_costs_by_model = defaultdict(list)  # Для box plot
+    
+    def _get_period_start(self):
+        """Возвращает начальную дату фильтрации."""
+        now = datetime.now()
+        if self.period == 'day':
+            return now - timedelta(days=1)
+        elif self.period == 'week':
+            return now - timedelta(days=7)
+        elif self.period == 'month':
+            return now - timedelta(days=30)
+        return None  # 'all' - без фильтра
         
     def analyze(self):
         """Анализирует CSV файл и собирает статистику."""
@@ -58,8 +72,14 @@ class CSVAnalyzer:
             # Парсим дату с UTC+7 смещением
             date_obj = datetime.fromisoformat(row['Date'].replace('Z', '+00:00'))
             date_utc7 = date_obj + timedelta(hours=7)
-            date_str = date_utc7.strftime('%Y-%m-%d')
-            hour = date_utc7.hour
+            date_utc7_naive = date_utc7.replace(tzinfo=None)
+            
+            # Фильтруем по периоду
+            if self.period_start and date_utc7_naive < self.period_start:
+                return
+            
+            date_str = date_utc7_naive.strftime('%Y-%m-%d')
+            hour = date_utc7_naive.hour
             
             # Парсим токены
             input_tokens = int(row.get('Input (w/ Cache Write)', 0) or 0)
