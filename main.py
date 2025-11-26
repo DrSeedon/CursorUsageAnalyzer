@@ -125,6 +125,7 @@ class CursorUsageAnalyzer:
         model_viz.create_tokens_detailed(models)
         model_viz.create_cost_per_request(models)
         model_viz.create_cost_distribution_boxplot(request_costs_by_model)
+        model_viz.create_token_composition(models)
         
         print("\n📉 Графики активности...")
         activity_viz = ActivityChartsVisualizer()

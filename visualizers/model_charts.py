@@ -355,4 +355,110 @@ class ModelChartsVisualizer(BaseVisualizer):
                             edgecolor='darkblue', alpha=0.8))
         
         self.save_figure('cost_distribution_boxplot.png')
+    
+    def create_token_composition(self, models):
+        """Создает stacked bar chart с процентным соотношением типов токенов."""
+        print("  └─ Структура токенов по моделям...")
+        
+        # Собираем данные
+        model_names = []
+        input_pct = []
+        output_pct = []
+        cache_read_pct = []
+        cache_write_pct = []
+        
+        for name, data in models.items():
+            total = (data['input_tokens'] + data['output_tokens'] + 
+                    data['cache_read'] + data['cache_write'])
+            if total == 0:
+                continue
+            
+            model_names.append(name)
+            input_pct.append(data['input_tokens'] / total * 100)
+            output_pct.append(data['output_tokens'] / total * 100)
+            cache_read_pct.append(data['cache_read'] / total * 100)
+            cache_write_pct.append(data['cache_write'] / total * 100)
+        
+        if not model_names:
+            print("     [!] Нет данных для графика")
+            return
+        
+        # Сортируем по cache_read (самые эффективные по кешу сверху)
+        sorted_indices = sorted(range(len(model_names)), 
+                               key=lambda i: cache_read_pct[i], reverse=True)
+        
+        model_names = [model_names[i] for i in sorted_indices]
+        input_pct = [input_pct[i] for i in sorted_indices]
+        output_pct = [output_pct[i] for i in sorted_indices]
+        cache_read_pct = [cache_read_pct[i] for i in sorted_indices]
+        cache_write_pct = [cache_write_pct[i] for i in sorted_indices]
+        
+        # Создаем график
+        fig, ax = plt.subplots(figsize=(14, max(8, len(model_names) * 0.6)))
+        
+        y = np.arange(len(model_names))
+        height = 0.7
+        
+        # Цвета
+        colors = {
+            'input': '#3498db',      # Синий - Input
+            'output': '#e74c3c',     # Красный - Output  
+            'cache_read': '#2ecc71', # Зеленый - Cache Read (дешево!)
+            'cache_write': '#f39c12' # Оранжевый - Cache Write
+        }
+        
+        # Stacked horizontal bars
+        bars_input = ax.barh(y, input_pct, height, label='Input Tokens', 
+                            color=colors['input'], edgecolor='white', linewidth=0.5)
+        bars_output = ax.barh(y, output_pct, height, left=input_pct, 
+                             label='Output Tokens', color=colors['output'], 
+                             edgecolor='white', linewidth=0.5)
+        
+        left_cache_read = [input_pct[i] + output_pct[i] for i in range(len(model_names))]
+        bars_cache_read = ax.barh(y, cache_read_pct, height, left=left_cache_read,
+                                 label='Cache Read (дешево)', color=colors['cache_read'],
+                                 edgecolor='white', linewidth=0.5)
+        
+        left_cache_write = [left_cache_read[i] + cache_read_pct[i] for i in range(len(model_names))]
+        bars_cache_write = ax.barh(y, cache_write_pct, height, left=left_cache_write,
+                                  label='Cache Write', color=colors['cache_write'],
+                                  edgecolor='white', linewidth=0.5)
+        
+        # Добавляем проценты на бары (только если > 5%)
+        for i in range(len(model_names)):
+            # Input
+            if input_pct[i] > 5:
+                ax.text(input_pct[i] / 2, i, f'{input_pct[i]:.1f}%', 
+                       ha='center', va='center', fontsize=9, fontweight='bold', color='white')
+            
+            # Output
+            if output_pct[i] > 5:
+                ax.text(input_pct[i] + output_pct[i] / 2, i, f'{output_pct[i]:.1f}%',
+                       ha='center', va='center', fontsize=9, fontweight='bold', color='white')
+            
+            # Cache Read
+            if cache_read_pct[i] > 5:
+                ax.text(left_cache_read[i] + cache_read_pct[i] / 2, i, f'{cache_read_pct[i]:.1f}%',
+                       ha='center', va='center', fontsize=9, fontweight='bold', color='white')
+            
+            # Cache Write
+            if cache_write_pct[i] > 5:
+                ax.text(left_cache_write[i] + cache_write_pct[i] / 2, i, f'{cache_write_pct[i]:.1f}%',
+                       ha='center', va='center', fontsize=9, fontweight='bold', color='white')
+        
+        ax.set_yticks(y)
+        ax.set_yticklabels(model_names, fontsize=10)
+        ax.set_xlabel('Percentage (%)', fontsize=12, fontweight='bold')
+        ax.set_title('Token Composition by Model\n(Input / Output / Cache Read / Cache Write)', 
+                    fontsize=16, fontweight='bold', pad=20)
+        ax.set_xlim(0, 100)
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08), ncol=4, fontsize=10)
+        ax.grid(axis='x', alpha=0.3, linestyle='--')
+        
+        # Добавляем вертикальные линии на 25%, 50%, 75%
+        for x in [25, 50, 75]:
+            ax.axvline(x=x, color='gray', linestyle=':', alpha=0.5, linewidth=1)
+        
+        plt.tight_layout()
+        self.save_figure('token_composition.png')
 
