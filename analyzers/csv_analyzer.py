@@ -31,6 +31,8 @@ class CSVAnalyzer:
         self.daily_usage = defaultdict(lambda: defaultdict(int))
         self.hourly_usage = defaultdict(int)
         self.request_costs_by_model = defaultdict(list)  # Для box plot
+        self.daily_cost = defaultdict(float)  # Стоимость по дням
+        self.hourly_cost = defaultdict(float)  # Стоимость по часам
     
     def _get_period_start(self):
         """Возвращает начальную дату фильтрации."""
@@ -60,7 +62,9 @@ class CSVAnalyzer:
             'models': dict(self.models),
             'daily_usage': dict(self.daily_usage),
             'hourly_usage': dict(self.hourly_usage),
-            'request_costs_by_model': dict(self.request_costs_by_model)
+            'request_costs_by_model': dict(self.request_costs_by_model),
+            'daily_cost': dict(self.daily_cost),
+            'hourly_cost': dict(self.hourly_cost)
         }
     
     def _process_row(self, row):
@@ -89,10 +93,14 @@ class CSVAnalyzer:
             input_no_cache = int(row.get('Input (w/o Cache Write)', 0) or 0)
             cache_write = max(0, input_tokens - input_no_cache)
             
-            # Считаем стоимость
-            cost = CostCalculator.calculate_cost(
-                model, input_no_cache, output_tokens, cache_read, cache_write
-            )
+            # Считаем стоимость (приоритет: данные из CSV, затем расчет)
+            csv_cost = float(row.get('Cost', 0) or 0)
+            if csv_cost > 0:
+                cost = csv_cost
+            else:
+                cost = CostCalculator.calculate_cost(
+                    model, input_no_cache, output_tokens, cache_read, cache_write
+                )
             
             # Обновляем статистику
             if kind == 'Included':
@@ -116,6 +124,8 @@ class CSVAnalyzer:
             if kind in ['Included', 'On-Demand']:
                 self.daily_usage[date_str][model] += 1
                 self.hourly_usage[hour] += 1
+                self.daily_cost[date_str] += cost
+                self.hourly_cost[hour] += cost
                 
         except (KeyError, ValueError) as e:
             # Пропускаем проблемные строки

@@ -116,6 +116,8 @@ class CursorUsageAnalyzer:
         daily_usage = self.results['daily_usage']
         hourly_usage = self.results['hourly_usage']
         request_costs_by_model = self.results['request_costs_by_model']
+        daily_cost = self.results['daily_cost']
+        hourly_cost = self.results['hourly_cost']
         monthly_cost = self.analyzer.get_total_cost()
         
         print("\n📈 Графики моделей...")
@@ -132,13 +134,17 @@ class CursorUsageAnalyzer:
         activity_viz.create_daily_activity(daily_usage)
         activity_viz.create_daily_activity_separate(daily_usage)
         
+        print("\n💰 Графики стоимости...")
+        activity_viz.create_cumulative_cost_daily(daily_cost)
+        activity_viz.create_cumulative_cost_hourly(hourly_cost)
+        
         print("\n🔥 Хитмапы...")
         heatmap_viz = HeatmapChartsVisualizer(self.csv_file)
         heatmap_viz.create_combined_requests_heatmap()
         heatmap_viz.create_combined_cost_heatmap()
         heatmap_viz.create_cost_per_request_heatmap()
         
-        print("\n✅ Создано 10 графиков в папке graphics/")
+        print("\n✅ Создано 12 графиков в папке graphics/")
     
     def run(self):
         """Запускает полный анализ."""

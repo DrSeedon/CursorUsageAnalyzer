@@ -1,6 +1,13 @@
 # Конфигурация цен для различных моделей ИИ (официальные цены Cursor)
 # Цены указаны в долларах за 1M токенов
 # Источник: https://www.cursor.com/pricing
+#
+# ВАЖНЫЕ ЗАМЕТКИ:
+# - Claude 4.5 Opus: PROMO Sonnet pricing до Dec 5, 2025! ($3 вместо $5)
+# - Thinking variants: counts as 2 requests in legacy pricing
+# - Cache: writes = input × 1.25, reads = input × 0.1
+# - Cost 2x when input exceeds 200k tokens (for 1M context models)
+# - Bedrock/Vertex: +10% surcharge (не учтено)
 
 MODEL_PRICING = {
     # Claude модели (Anthropic)
@@ -19,17 +26,25 @@ MODEL_PRICING = {
     },
     
     'claude-4.5-opus': {
-        'input': 3.0,
-        'output': 15.0,
-        'cache_write': 3.75,
-        'cache_read': 0.30
+        'input_under_200k': 3.0,
+        'output_under_200k': 15.0,
+        'cache_write_under_200k': 3.75,
+        'cache_read_under_200k': 0.30,
+        'input_over_200k': 6.0,
+        'output_over_200k': 22.5,
+        'cache_write_over_200k': 7.5,
+        'cache_read_over_200k': 0.60
     },
     
     'claude-4.5-opus-high-thinking': {
-        'input': 3.0,
-        'output': 15.0,
-        'cache_write': 3.75,
-        'cache_read': 0.30
+        'input_under_200k': 3.0,
+        'output_under_200k': 15.0,
+        'cache_write_under_200k': 3.75,
+        'cache_read_under_200k': 0.30,
+        'input_over_200k': 6.0,
+        'output_over_200k': 22.5,
+        'cache_write_over_200k': 7.5,
+        'cache_read_over_200k': 0.60
     },
     
     'claude-4-sonnet': {
@@ -44,19 +59,28 @@ MODEL_PRICING = {
     },
     
     'claude-4.5-sonnet': {
-        'input': 3.0,
-        'output': 15.0,
-        'cache_write': 3.75,
-        'cache_read': 0.30
+        'input_under_200k': 3.0,
+        'output_under_200k': 15.0,
+        'cache_write_under_200k': 3.75,
+        'cache_read_under_200k': 0.30,
+        'input_over_200k': 6.0,
+        'output_over_200k': 22.5,
+        'cache_write_over_200k': 7.5,
+        'cache_read_over_200k': 0.60
     },
     
     'claude-4.5-sonnet-thinking': {
-        'input': 3.0,
-        'output': 15.0,
-        'cache_write': 3.75,
-        'cache_read': 0.30
+        'input_under_200k': 3.0,
+        'output_under_200k': 15.0,
+        'cache_write_under_200k': 3.75,
+        'cache_read_under_200k': 0.30,
+        'input_over_200k': 6.0,
+        'output_over_200k': 22.5,
+        'cache_write_over_200k': 7.5,
+        'cache_read_over_200k': 0.60
     },
     
+    # Haiku: 200k контекст, нет over_200k цен
     'claude-4.5-haiku': {
         'input': 1.0,
         'output': 5.0,
@@ -98,11 +122,13 @@ MODEL_PRICING = {
         'cache_read': 0.125
     },
     
+    # Gemini 3 Pro Preview: ВЫЧИСЛЕННЫЕ цены из CSV (не совпадают с официальными!)
+    # Официальные: cache_read = $0.20, но реально в данных ~$0.50
     'gemini-3-pro-preview': {
         'input': 2.0,
         'output': 12.0,
         'cache_write': 2.0,
-        'cache_read': 0.20
+        'cache_read': 0.50  # Вычислено из CSV данных!
     },
     
     # DeepSeek модели
