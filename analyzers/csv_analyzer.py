@@ -33,6 +33,17 @@ class CSVAnalyzer:
         self.request_costs_by_model = defaultdict(list)  # Для box plot
         self.daily_cost = defaultdict(float)  # Стоимость по дням
         self.hourly_cost = defaultdict(float)  # Стоимость по часам
+        self.daily_cost_by_model = defaultdict(lambda: defaultdict(float))  # Стоимость по дням и моделям
+        self.hourly_cost_by_model = defaultdict(lambda: defaultdict(float))  # Стоимость по часам и моделям
+        self.hourly_cost_full = defaultdict(float)  # Стоимость по часам (YYYY-MM-DD HH:00)
+        self.hourly_cost_by_model_full = defaultdict(lambda: defaultdict(float))  # Стоимость по часам и моделям (полный ключ)
+        self.hourly_requests_full = defaultdict(int)  # Запросы по часам (YYYY-MM-DD HH:00)
+        self.hourly_requests_by_model_full = defaultdict(lambda: defaultdict(int))  # Запросы по часам и моделям (полный ключ)
+        self.ten_min_cost = defaultdict(float)  # Стоимость по 10-минутным интервалам
+        self.ten_min_cost_by_model = defaultdict(lambda: defaultdict(float))  # Стоимость по 10 минут и моделям
+        self.ten_min_requests = defaultdict(int)  # Запросы по 10-минутным интервалам
+        self.ten_min_requests_by_model = defaultdict(lambda: defaultdict(int))  # Запросы по 10 минут и моделям
+        self.all_timestamps = []  # Все временные метки для анализа
     
     def _get_period_start(self):
         """Возвращает начальную дату фильтрации."""
@@ -64,7 +75,18 @@ class CSVAnalyzer:
             'hourly_usage': dict(self.hourly_usage),
             'request_costs_by_model': dict(self.request_costs_by_model),
             'daily_cost': dict(self.daily_cost),
-            'hourly_cost': dict(self.hourly_cost)
+            'hourly_cost': dict(self.hourly_cost),
+            'daily_cost_by_model': dict(self.daily_cost_by_model),
+            'hourly_cost_by_model': dict(self.hourly_cost_by_model),
+            'hourly_cost_full': dict(self.hourly_cost_full),
+            'hourly_cost_by_model_full': dict(self.hourly_cost_by_model_full),
+            'hourly_requests_full': dict(self.hourly_requests_full),
+            'hourly_requests_by_model_full': dict(self.hourly_requests_by_model_full),
+            'ten_min_cost': dict(self.ten_min_cost),
+            'ten_min_cost_by_model': dict(self.ten_min_cost_by_model),
+            'ten_min_requests': dict(self.ten_min_requests),
+            'ten_min_requests_by_model': dict(self.ten_min_requests_by_model),
+            'all_timestamps': sorted(self.all_timestamps)
         }
     
     def _process_row(self, row):
@@ -126,6 +148,26 @@ class CSVAnalyzer:
                 self.hourly_usage[hour] += 1
                 self.daily_cost[date_str] += cost
                 self.hourly_cost[hour] += cost
+                self.daily_cost_by_model[date_str][model] += cost
+                self.hourly_cost_by_model[hour][model] += cost
+                
+                # Почасовая статистика с полным ключом (YYYY-MM-DD HH:00)
+                hour_full_key = date_utc7_naive.strftime('%Y-%m-%d %H:00')
+                self.hourly_cost_full[hour_full_key] += cost
+                self.hourly_cost_by_model_full[hour_full_key][model] += cost
+                self.hourly_requests_full[hour_full_key] += 1
+                self.hourly_requests_by_model_full[hour_full_key][model] += 1
+                
+                # 10-минутные интервалы
+                ten_min_key = date_utc7_naive.strftime('%Y-%m-%d %H:%M')
+                ten_min_bucket = ten_min_key[:-1] + '0'  # Округляем до 10 минут
+                self.ten_min_cost[ten_min_bucket] += cost
+                self.ten_min_cost_by_model[ten_min_bucket][model] += cost
+                self.ten_min_requests[ten_min_bucket] += 1
+                self.ten_min_requests_by_model[ten_min_bucket][model] += 1
+                
+                # Сохраняем временную метку для графиков
+                self.all_timestamps.append((date_utc7_naive, model, cost))
                 
         except (KeyError, ValueError) as e:
             # Пропускаем проблемные строки

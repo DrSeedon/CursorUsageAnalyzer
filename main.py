@@ -3,8 +3,9 @@
 Модульная версия с разделением на компоненты.
 """
 
-from utils import find_csv_file, setup_output_encoding
+from utils import find_csv_file, setup_output_encoding, clear_directory
 from analyzers import CSVAnalyzer
+from visualizers.base_visualizer import BaseVisualizer
 from visualizers import ModelChartsVisualizer, ActivityChartsVisualizer, HeatmapChartsVisualizer
 
 
@@ -108,6 +109,10 @@ class CursorUsageAnalyzer:
         if not self.results:
             return
         
+        # Очищаем папку перед созданием новых графиков
+        clear_directory('graphics')
+        BaseVisualizer.reset_counter()
+        
         print("\n" + "=" * 70)
         print("📊 СОЗДАНИЕ ГРАФИКОВ")
         print("=" * 70)
@@ -118,6 +123,17 @@ class CursorUsageAnalyzer:
         request_costs_by_model = self.results['request_costs_by_model']
         daily_cost = self.results['daily_cost']
         hourly_cost = self.results['hourly_cost']
+        daily_cost_by_model = self.results['daily_cost_by_model']
+        hourly_cost_by_model = self.results['hourly_cost_by_model']
+        hourly_cost_full = self.results['hourly_cost_full']
+        hourly_cost_by_model_full = self.results['hourly_cost_by_model_full']
+        hourly_requests_full = self.results['hourly_requests_full']
+        hourly_requests_by_model_full = self.results['hourly_requests_by_model_full']
+        ten_min_cost = self.results['ten_min_cost']
+        ten_min_cost_by_model = self.results['ten_min_cost_by_model']
+        ten_min_requests = self.results['ten_min_requests']
+        ten_min_requests_by_model = self.results['ten_min_requests_by_model']
+        all_timestamps = self.results['all_timestamps']
         monthly_cost = self.analyzer.get_total_cost()
         
         print("\n📈 Графики моделей...")
@@ -135,8 +151,28 @@ class CursorUsageAnalyzer:
         activity_viz.create_daily_activity_separate(daily_usage)
         
         print("\n💰 Графики стоимости...")
-        activity_viz.create_cumulative_cost_daily(daily_cost)
-        activity_viz.create_cumulative_cost_hourly(hourly_cost)
+        activity_viz.create_cost_timeline_all_period(all_timestamps)
+        activity_viz.create_cost_timeline_last_month(daily_cost_by_model)
+        activity_viz.create_cost_timeline_last_week(hourly_cost_full)
+        activity_viz.create_cost_timeline_last_day(ten_min_cost)
+        
+        print("\n💰 Графики стоимости по моделям...")
+        activity_viz.create_cost_timeline_by_model_all_period(all_timestamps, models)
+        activity_viz.create_cost_timeline_by_model_last_month(daily_cost_by_model, models)
+        activity_viz.create_cost_timeline_by_model_last_week(hourly_cost_by_model_full, models)
+        activity_viz.create_cost_timeline_by_model_last_day(ten_min_cost_by_model, models)
+        
+        print("\n📊 Графики запросов...")
+        activity_viz.create_request_timeline_all_period(all_timestamps)
+        activity_viz.create_request_timeline_last_month(daily_usage)
+        activity_viz.create_request_timeline_last_week(hourly_requests_full)
+        activity_viz.create_request_timeline_last_day(ten_min_requests)
+        
+        print("\n📊 Графики запросов по моделям...")
+        activity_viz.create_request_timeline_by_model_all_period(all_timestamps, models)
+        activity_viz.create_request_timeline_by_model_last_month(daily_usage, models)
+        activity_viz.create_request_timeline_by_model_last_week(hourly_requests_by_model_full, models)
+        activity_viz.create_request_timeline_by_model_last_day(ten_min_requests_by_model, models)
         
         print("\n🔥 Хитмапы...")
         heatmap_viz = HeatmapChartsVisualizer(self.csv_file)
@@ -144,7 +180,7 @@ class CursorUsageAnalyzer:
         heatmap_viz.create_combined_cost_heatmap()
         heatmap_viz.create_cost_per_request_heatmap()
         
-        print("\n✅ Создано 12 графиков в папке graphics/")
+        print("\n✅ Создано 25 графиков в папке graphics/")
     
     def run(self):
         """Запускает полный анализ."""

@@ -9,6 +9,11 @@ class BaseVisualizer:
     
     _figure_counter = 0
     
+    @classmethod
+    def reset_counter(cls):
+        """Сбрасывает счетчик фигур."""
+        cls._figure_counter = 0
+    
     def __init__(self, output_dir='graphics'):
         """
         Инициализирует визуализатор.
