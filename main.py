@@ -177,10 +177,11 @@ class CursorUsageAnalyzer:
         print("\n🔥 Хитмапы...")
         heatmap_viz = HeatmapChartsVisualizer(self.csv_file)
         heatmap_viz.create_combined_requests_heatmap()
+        heatmap_viz.create_requests_heatmap_last_month()
         heatmap_viz.create_combined_cost_heatmap()
         heatmap_viz.create_cost_per_request_heatmap()
-        
-        print("\n✅ Создано 25 графиков в папке graphics/")
+
+        print("\n✅ Создано 26 графиков в папке graphics/")
     
     def run(self):
         """Запускает полный анализ."""

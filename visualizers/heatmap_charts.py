@@ -31,63 +31,79 @@ class HeatmapChartsVisualizer(BaseVisualizer):
             return "0"
         return f"{value:.{decimals}f}"
     
-    def create_combined_requests_heatmap(self):
-        """Создает объединенный хитмап: матрица в центре, суммы по краям."""
+    def _read_requests_by_weekday_hour(self, label, days_limit=None):
         weekday_hourly = defaultdict(lambda: defaultdict(int))
-        
-        print("  └─ Объединенный хитмап активности...")
+
+        print(f"  └─ {label}...")
         with open(self.csv_file, 'r', encoding='utf-8') as f:
             lines = sum(1 for _ in f) - 1
-        
+
+        cutoff = None
+        if days_limit is not None:
+            cutoff = datetime.now().astimezone() - timedelta(days=days_limit)
+
         with open(self.csv_file, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in tqdm(reader, total=lines, desc="     Обработка", unit="строк", leave=False):
                 if row['Kind'] in ['Included', 'On-Demand']:
                     try:
                         date_obj = datetime.fromisoformat(row['Date'].replace('Z', '+00:00'))
+                        if cutoff and date_obj < cutoff:
+                            continue
                         date_utc7 = date_obj + timedelta(hours=7)
                         weekday = date_utc7.weekday()
                         hour = date_utc7.hour
                         weekday_hourly[weekday][hour] += 1
                     except:
                         pass
-        
+        return weekday_hourly
+
+    def _render_requests_heatmap(self, weekday_hourly, title, filename):
         weekday_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         heatmap_data = []
-        
+
         for weekday in range(7):
             row = [weekday_hourly[weekday].get(hour, 0) for hour in range(24)]
             heatmap_data.append(row)
-        
+
         heatmap_array = np.array(heatmap_data)
         hourly_totals = heatmap_array.sum(axis=0)
         weekday_totals = heatmap_array.sum(axis=1)
-        
+
         fig = plt.figure(figsize=(16, 10))
-        gs = fig.add_gridspec(2, 2, height_ratios=[1, 4], width_ratios=[1, 8], 
+        gs = fig.add_gridspec(2, 2, height_ratios=[1, 4], width_ratios=[1, 8],
                               hspace=0.05, wspace=0.05)
-        
+
         ax_top = fig.add_subplot(gs[0, 1])
         ax_left = fig.add_subplot(gs[1, 0])
         ax_main = fig.add_subplot(gs[1, 1])
-        
+
         hourly_matrix = hourly_totals.reshape(1, -1)
         sns.heatmap(hourly_matrix, annot=True, fmt='.0f', cmap='YlOrRd',
                     xticklabels=[], yticklabels=[], ax=ax_top, cbar=False)
-        ax_top.set_title('Activity by Hour and Day', 
-                        fontsize=16, fontweight='bold', pad=20)
-        
+        ax_top.set_title(title, fontsize=16, fontweight='bold', pad=20)
+
         weekday_matrix = weekday_totals.reshape(-1, 1)
         sns.heatmap(weekday_matrix, annot=True, fmt='.0f', cmap='YlOrRd',
                     xticklabels=[], yticklabels=weekday_names, ax=ax_left, cbar=False)
-        
+
         sns.heatmap(heatmap_array, annot=True, fmt='.0f', cmap='YlOrRd',
                     xticklabels=list(range(24)), yticklabels=[],
                     ax=ax_main, cbar=False)
         ax_main.set_xlabel('Hour of Day', fontsize=12)
-        
+
         plt.subplots_adjust(left=0.08, right=0.98, top=0.95, bottom=0.05)
-        self.save_figure('requests_heatmap.png', use_tight_layout=False)
+        self.save_figure(filename, use_tight_layout=False)
+
+    def create_combined_requests_heatmap(self):
+        """Создает объединенный хитмап: матрица в центре, суммы по краям."""
+        weekday_hourly = self._read_requests_by_weekday_hour("Объединенный хитмап активности")
+        self._render_requests_heatmap(weekday_hourly, 'Activity by Hour and Day', 'requests_heatmap.png')
+
+    def create_requests_heatmap_last_month(self):
+        """Создает хитмап запросов за последний месяц."""
+        weekday_hourly = self._read_requests_by_weekday_hour("Хитмап запросов за последний месяц", days_limit=30)
+        self._render_requests_heatmap(weekday_hourly, 'Activity by Hour and Day (Last 30 Days)', 'requests_heatmap_last_month.png')
     
     def create_combined_cost_heatmap(self):
         """Создает объединенный хитмап стоимости: матрица в центре, суммы по краям."""
